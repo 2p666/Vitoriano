@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Segredo de <span class="mel-gold">Melissa</span></title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&amp;family=Cormorant+Garamond:wght@400;500;600;700&amp;family=IM+Fell+English+SC&amp;family=Tangerine:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="segredoVic.css" rel="stylesheet">
+</link></head>
+<body>
+<div aria-hidden="true" class="ambient-vignette"></div>
+<div aria-hidden="true" class="dust-layer"><canvas id="dust-canvas"></canvas></div>
+<div aria-hidden="true" id="lantern-mask"></div>
+<div aria-hidden="true" id="darkness-mask"></div>
+<div aria-hidden="true" id="candle-cursor"></div>
+<!-- SONS DO SEGREDO — troque os arquivos mantendo os caminhos ou altere no JS
+       Música de fundo:       S.M/SegredoMusica.mp3
+       Som ambiente:          S.M/SegredoAmbiente.mp3
+       Cadeado abrindo:       S.M/CadeadoAbrindo.mp3
+       Carta abrindo:         S.M/CartaAbrindo.mp3
+       Universo da carta:     S.M/UniversoCarta.mp3
+       Universo do filhinho:  S.M/UniversoFilhinho.mp3
+       Universo da memória:   S.M/UniversoMemoria.mp3
+       Universo das mensagens:S.M/UniversoMensagens.mp3
+       Universo do futuro:    S.M/UniversoFuturo.mp3
+       Universo do coração:   S.M/UniversoCoracao.mp3
+  -->
+<audio id="segredo-musica-fundo" loop="" preload="auto"><source src="S.M/SegredoMusica.mp3" type="audio/mpeg"/></audio>
+<audio id="segredo-som-ambiente" loop="" preload="auto"><source src="S.M/SegredoAmbiente.mp3" type="audio/mpeg"/></audio>
+<audio id="som-cadeado-abre" preload="auto"><source src="S.M/CadeadoAbrindo.mp3" type="audio/mpeg"/></audio>
+<audio id="som-carta-abre" preload="auto"><source src="S.M/CartaAbrindo.mp3" type="audio/mpeg"/></audio>
+<audio id="musica-carta" loop="" preload="auto"><source src="S.M/UniversoCarta.mp3" type="audio/mpeg"/></audio>
+<audio id="musica-filhinho" loop="" preload="auto"><source src="S.M/UniversoFilhinho.mp3" type="audio/mpeg"/></audio>
+<audio id="musica-memoria" loop="" preload="auto"><source src="S.M/UniversoMemoria.mp3" type="audio/mpeg"/></audio>
+<audio id="musica-sombra" loop="" preload="auto"><source src="S.M/UniversoMensagens.mp3" type="audio/mpeg"/></audio>
+<audio id="musica-futuro" loop="" preload="auto"><source src="S.M/UniversoFuturo.mp3" type="audio/mpeg"/></audio>
+<audio id="musica-coracao" loop="" preload="auto"><source src="S.M/UniversoCoracao.mp3" type="audio/mpeg"/></audio>
+<button aria-hidden="true" aria-label="Lanterna removida" class="lantern-toggle removed-lantern" disabled="" id="lantern-toggle" tabindex="-1" type="button">
+<img alt="Lanterna" id="lantern-image" src="imgVic/lanterna.png"/>
+<div class="lantern-fallback" id="lantern-fallback">Lanterna</div>
+</button>
+<div aria-live="polite" class="puzzle-panel" id="puzzle-panel">
+<div class="puzzle-title">Dica mágica</div>
+<div class="puzzle-text" id="puzzle-text">
+      A chave tocou o cadeado. Agora gire a chave até a posição que o buraco exige.
+    </div>
+<div class="puzzle-keys"><span class="magic-tip">Use Q e E para girar a chave</span></div>
+</div>
+<main class="scene">
+<div class="top-note" id="top-note">
+<span class="magic-note">Procure a chave no escuro. A vela revelará aquilo que a sombra tenta esconder.</span>
+</div>
+<section aria-label="Coração trancado" class="lock-stage visible" id="lock-stage">
+<div class="lock-altar" id="lock-altar">
+<div class="slot-glow" id="slot-glow"></div>
+<div class="unlock-glow"></div>
+<div aria-hidden="true" class="chain-img-wrap left">
+<img alt="" src="imgVic/ccc.png"/>
+</div>
+<div aria-hidden="true" class="chain-img-wrap right">
+<img alt="" src="imgVic/ccc.png"/>
+</div>
+<div class="lock-wrap" id="lock-wrap">
+<img alt="Cadeado em formato de coração" class="lock-heart" draggable="false" id="lock-image" src="imgVic/Cadeado.png"/>
+<div aria-hidden="true" class="lock-fallback" id="lock-fallback">
+<div class="heart-shape"></div>
+</div>
+<div class="lock-hit-area" id="lock-hit-area"></div>
+</div>
+<div aria-label="Chave escondida no escuro" class="key-wrap key-hidden" id="key-wrap" style="left:78%; top:72%;">
+<img alt="Chave antiga" class="key-image" draggable="false" id="key-image" src="imgVic/chave.png"/>
+<div aria-hidden="true" class="key-fallback" id="key-fallback">
+<div class="ring"></div>
+<div class="shaft"></div>
+<div class="teeth"></div>
+</div>
+</div>
+</div>
+<div class="small-instruction">
+<span class="magic-note">Encontre a chave no escuro, arraste até o cadeado e depois use Q e E para girá-la.</span>
+</div>
+</section>
+<section aria-label="Baú do tesouro" class="chest-stage" id="chest-stage">
+<div class="chest-scene">
+<div class="chest-front-view" id="chest-front-view">
+<button aria-label="Abrir baú" class="chest-front" id="chest-front-btn" type="button">
+<img alt="Baú de frente" class="chest-base-front" id="chest-base-front-img" src="imgVic/bau.png"/>
+<img alt="Tampa do baú" class="chest-lid-front" id="chest-lid-front-img" src="imgVic/tampa-bau.png"/>
+<div aria-hidden="true" class="front-fallback" id="front-fallback">
+<div class="fb-base"></div>
+<div class="fb-lid"></div>
+</div>
+</button>
+</div>
+<div class="chest-top-view" id="chest-top-view">
+<div class="top-chest-wrap">
+<div class="chest-top-shell">
+<img alt="Baú aberto visto de cima" id="chest-top-img" src="imgVic/BauAberto.png"/>
+<div aria-hidden="true" class="top-fallback" id="top-fallback"></div>
+</div>
+<div aria-hidden="true" class="chest-cobweb chest-cobweb-left"></div>
+<div aria-hidden="true" class="chest-cobweb chest-cobweb-right"></div>
+<div aria-hidden="true" class="chest-items-art">
+<img alt="" src="imgVic/BaúSobre.png"/>
+<span class="painted-candle-glow"></span>
+</div>
+<div aria-label="Itens dentro do baú" class="treasure-grid treasure-hit-map">
+<button aria-label="Carta selada" class="treasure-item item-1" id="item-carta" type="button">
+<img alt="Carta" src="imgVic/cartaF.png"/>
+<div class="item-fallback">Carta</div>
+</button>
+<button aria-label="Nosso filhinho de pelúcia" class="treasure-item item-2" id="item-filhinho" type="button">
+<img alt="Nosso filhinho de pelúcia" src="imgVic/nenem.png"/>
+<div class="item-fallback">Filhinho</div>
+</button>
+<button aria-label="Memória viva" class="treasure-item item-3" id="item-memoria" type="button">
+<img alt="Item 3" src="imgVic/caveiração.png"/>
+<div class="item-fallback">Memória</div>
+</button>
+<button aria-label="O lado humano do amor" class="treasure-item item-4" id="item-sombra" type="button">
+<img alt="Item 4" src="imgVic/item-4.png"/>
+<div class="item-fallback">Sombra</div>
+</button>
+<button aria-label="O futuro" class="treasure-item item-5" id="item-futuro" type="button">
+<img alt="Item 5" src="imgVic/item-5.png"/>
+<div class="item-fallback">Futuro</div>
+</button>
+<button aria-label="O coração" class="treasure-item item-6" id="item-coracao" type="button">
+<img alt="Item 6" src="imgVic/item-6.png"/>
+<div class="item-fallback">Coração</div>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="small-instruction">
+<span class="magic-note">Toque no baú para abri-lo. Depois escolha um dos seis itens.</span>
+</div>
+</section>
+<section aria-label="Carta aberta para o amor" class="letter-stage" id="letter-stage">
+<div class="letter-overlay" id="letter-overlay"></div>
+<div class="letter-altar">
+<div class="scroll-wrap">
+<div aria-hidden="true" class="scroll-top"></div>
+<div aria-hidden="true" class="scroll-bottom"></div>
+<div class="scroll-body closed" id="scroll-body">
+<button aria-label="Desatar laço da carta" class="ribbon-knot" id="ribbon-knot" type="button">
+<img alt="Laço vermelho" draggable="false" id="ribbon-image" src="imgVic/Lacego.png"/>
+<div aria-hidden="true" class="ribbon-fallback" id="ribbon-fallback">
+<span class="ribbon-loop-left"></span>
+<span class="ribbon-loop-right"></span>
+<span class="ribbon-tail-left"></span>
+<span class="ribbon-tail-right"></span>
+<span class="ribbon-center"></span>
+</div>
+</button>
+<div class="letter-content" id="letter-content">
+<button aria-label="Fechar carta" class="letter-close" type="button">×</button>
+<div class="letter-mark">Carta aberta para o <span class="mel-gold">amor</span></div>
+<h1 class="letter-title">Ao coração que fez do meu destino um lugar de abrigo</h1>
+<div class="letter-text">
+<p><span class="mel-gold">Melissa</span>,</p>
+<p>Eu poderia falar da viagem…
+das luzes de Natal, das decorações gigantes, dos mais de um milhão e meio que a prefeitura gastou pra deixar tudo bonito.
+
+E tava mesmo.
+
+Mas, sendo sincero… nada daquilo foi o que mais ficou em mim.
+
+Porque enquanto todo mundo olhava pras luzes, pras cores, pras coisas brilhando…
+eu tava olhando pra <span class="mel-gold">você</span>.
+
+E era diferente.</p>
+<p>Não era só o momento.
+
+Era a sensação de estar ali, do <span class="mel-gold">teu</span> lado, vivendo aquilo sabendo que um dia ia virar só memória.
+
+E mesmo assim… escolher sentir tudo.
+
+Cada segundo.
+
+Cada detalhe.
+
+Como se eu estivesse tentando guardar aquilo em algum lugar que não se perde com o tempo.
+
+Eu lembro das luzes refletindo no <span class="mel-gold">teu</span> rosto…
+e por um segundo, tudo parecia em silêncio.
+</p>
+<p>Como se o mundo tivesse diminuído só pra caber naquele momento.
+
+E eu pensei:
+
+“é isso.”
+
+Não o Natal.
+Não a cidade.
+Não o dinheiro gasto.
+
+Mas isso aqui.
+
+Estar com <span class="mel-gold">você</span>… enquanto o resto acontece ao redor.
+
+Porque no fim, tudo aquilo vai apagar.
+As luzes vão sumir.
+As decorações vão embora.
+
+Mas aquele momento…
+
+eu vivi ele de verdade, com <span class="mel-gold">você</span>.. Eu <span class="mel-gold">te</span> amo.</p>
+<div class="letter-signature">Com todo o meu <span class="mel-gold">amor</span>.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="small-instruction">
+<span class="magic-note">Clique no laço para abrir a carta. Clique fora para voltar ao baú.</span>
+</div>
+</section>
+</main>
+<!-- ITEM 2 — Micro-mundo do nosso filhinho -->
+<section aria-hidden="true" aria-label="Relicário do nosso filhinho" class="filhinho-stage" id="filhinho-stage">
+<div class="filhinho-overlay" id="filhinho-overlay"></div>
+<div aria-labelledby="filhinho-title" aria-modal="true" class="filhinho-card" role="dialog">
+<button aria-label="Fechar relicário do filhinho" class="filhinho-close" id="filhinho-close" type="button">×</button>
+<div class="filhinho-mark">Relicário do nosso filhinho</div>
+<h2 class="filhinho-title" id="filhinho-title">Quando ele quis falar com <span class="mel-gold">você</span></h2>
+<div class="filhinho-layout">
+<div class="filhinho-media-grid">
+<!--
+            TROQUE AQUI OS ARQUIVOS DO ITEM 2:
+            Vídeo:           imgVic/filhinho-video.mp4
+            Poster do vídeo: imgVic/filhinho-poster.jpg
+            Foto 1:          imgVic/filhinho-foto-1.jpg
+            Foto 2:          imgVic/filhinho-foto-2.jpg
+
+            Molduras:
+            Moldura do vídeo: imgVic/MolduraFilhinhoVideo.png
+            Moldura das fotos: imgVic/MolduraFilhinhoFoto.png
+
+            Corações voando:
+            imgVic/coracao-1.png
+            imgVic/coracao-2.png
+            imgVic/coracao-3.png
+          -->
+<figure class="filhinho-frame-box filhinho-video-box reveal-by-hearts">
+<video autoplay="" class="filhinho-video" controls="" id="filhinho-video" loop="" muted="" playsinline="" poster="imgVic/filhinho-poster.jpg" preload="auto">
+<source src="imgVic/videonenemmel.mp4" type="video/mp4"/>
+</video>
+<img alt="" aria-hidden="true" class="filhinho-moldura filhinho-moldura-video" src="imgVic/Mold.png"/>
+</figure>
+<figure class="filhinho-frame-box reveal-by-hearts">
+<img alt="Melissa com nosso filhinho 1" class="filhinho-photo" src="imgVic/melnenem1.jpg"/>
+<img alt="" aria-hidden="true" class="filhinho-moldura" src="imgVic/Mold.png"/>
+</figure>
+<figure class="filhinho-frame-box reveal-by-hearts">
+<img alt="Melissa com nosso filhinho 2" class="filhinho-photo" src="imgVic/melnenem2.jpg"/>
+<img alt="" aria-hidden="true" class="filhinho-moldura" src="imgVic/Mold.png"/>
+</figure>
+</div>
+<div class="filhinho-letter reveal-by-hearts">
+<!-- TEXTO DO FILHINHO: edite livremente aqui -->
+<p>Oii mamãe.</p>
+<p>Eu sei que sou pequeno, macio e meio bobo, mas eu vi muita coisa daqui (MUINTA coisa). Vi <span class="mel-gold">seu</span> sorriso, vi os dias em que <span class="mel-gold">você</span> me segurou, vi o jeito como <span class="mel-gold">você</span> transforma qualquer coisinha simples em carinho.</p>
+<p>Eu fui dado para <span class="mel-gold">você</span> como presente e passei muito tempo guardado no escuro, mas acabei virando testemunha de um <span class="mel-gold">amor</span>. Cada foto <span class="mel-gold">sua</span> comigo guarda um pedacinho desse primeiro ano: um pedacinho fofo, nosso, impossível de explicar para quem olha de fora.</p>
+<p>Então, quando <span class="mel-gold">você</span> me ver, lembra: eu não sou só um bichinho. Eu sou um pedacinho do papai ficando perto de <span class="mel-gold">você</span> mesmo quando ele não está.</p>
+<p class="filhinho-signature">Com carinho, Neném</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ITEM 3 — Memória Viva -->
+<section aria-hidden="true" aria-label="Memória viva" class="relic-stage memoria-stage" id="memoria-stage">
+<div class="relic-overlay" data-close-relic=""></div>
+<div aria-labelledby="memoria-title" aria-modal="true" class="relic-card memoria-card" role="dialog">
+<button aria-label="Fechar memória viva" class="relic-close" data-close-relic="" type="button">×</button>
+<div class="relic-mark">Item III · Memória viva</div>
+<h2 class="relic-title" id="memoria-title">Um instante que o tempo não conseguiu levar</h2>
+<p class="relic-subtitle">Algumas memórias <span class="mel-gold">nossas</span>.</p>
+<div class="memory-wall">
+<figure class="memory-polaroid active" data-memory-audio="S.M/memoria-1.mp3" data-memory-text="Foi aqui que uma parte do mundo pareceu ficar mais leve só porque você estava nele.">
+<img alt="Memória 1" src="imgVic/Verde.png"/>
+<figcaption>Memória I</figcaption>
+</figure>
+<figure class="memory-polaroid memory-video-polaroid" data-memory-audio="S.M/memoria-2.mp3" data-memory-text="Algumas lembranças não ficam paradas como foto. Elas continuam se mexendo, como se o tempo ainda respirasse dentro delas.">
+          
+<video autoplay="" class="memory-video" controls="" loop="" muted="" playsinline="" poster="imgVic/Mold.png" preload="auto" style="width:100%; height:100%; display:block; object-fit:cover; border-radius:4px;">
+<source src="imgVic/uba.mp4" type="video/mp4"/>
+</video>
+<figcaption>Memória II</figcaption>
+</figure>
+<figure class="memory-polaroid" data-memory-audio="S.M/memoria-3.mp3" data-memory-text="Se eu pudesse voltar por alguns segundos, escolheria só te olhar de novo naquele dia.">
+<img alt="Memória 3" src="imgVic/Eu..Voce.webp"/>
+<figcaption>Memória III</figcaption>
+</figure>
+</div>
+<div class="memory-text-box" id="memory-text-box">
+        Foi aqui que uma parte do mundo pareceu ficar mais leve só porque <span class="mel-gold">você</span> estava nele.
+      </div>
+</div>
+</section>
+<!-- ITEM 4 — Canal secreto de mensagens -->
+<section aria-hidden="true" aria-label="Canal secreto de mensagens" class="relic-stage sombra-stage chat-stage" id="sombra-stage">
+<div class="relic-overlay" data-close-relic=""></div>
+<div aria-labelledby="sombra-title" aria-modal="true" class="relic-card sombra-card chat-card" role="dialog">
+<button aria-label="Fechar canal secreto" class="relic-close" data-close-relic="" type="button">×</button>
+<div class="relic-mark">Item IV · Canal secreto</div>
+<h2 class="relic-title" id="sombra-title">Um lugar onde nossas mensagens ficam guardadas</h2>
+<p class="chat-subtitle">Escreva, sele e deixe que o relicário entregue. As mensagens aparecem aqui em tempo real.</p>
+<div class="secret-chat-shell">
+<div aria-live="polite" class="chat-messages" id="chat-messages">
+<div class="chat-loading">Abrindo o canal secreto...</div>
+</div>
+<form class="chat-form" id="chat-form">
+<label class="chat-label" for="chat-author">Quem está escrevendo?</label>
+<select class="chat-author" id="chat-author" name="author">
+<option value="Melissa">Melissa</option>
+<option value="Paulo">Paulo</option>
+</select>
+<label class="chat-label" for="chat-input">Mensagem</label>
+<textarea class="chat-input" id="chat-input" maxlength="1200" name="message" placeholder="Escreva aqui uma mensagem para selar no relicário..." rows="4"></textarea>
+<div class="chat-actions">
+<span class="chat-status" id="chat-status">Canal pronto.</span>
+<button class="chat-send" id="chat-send" type="submit">Selar mensagem</button>
+</div>
+</form>
+</div>
+</div>
+</section>
+<!-- ITEM 5 — O futuro -->
+<section aria-hidden="true" aria-label="O futuro" class="relic-stage futuro-stage" id="futuro-stage">
+<div class="relic-overlay" data-close-relic=""></div>
+<div aria-labelledby="futuro-title" aria-modal="true" class="relic-card futuro-card" role="dialog">
+<button aria-label="Fechar futuro" class="relic-close" data-close-relic="" type="button">×</button>
+<div class="relic-mark">Item V · O futuro</div>
+<h2 class="relic-title" id="futuro-title">Constelações do que ainda quero viver <span class="mel-gold">contigo</span></h2>
+<p class="future-instruction">Toque em uma estrela e depois em outra. Cada ligação acende uma promessa diferente.</p>
+<div class="constellation" id="constellation">
+<svg class="constellation-lines" id="constellation-lines" aria-hidden="true"></svg>
+<button class="star-point" data-id="aurora" data-label="A casa que ainda vamos construir" style="--x:8%; --y:18%;" type="button" aria-label="A casa que ainda vamos construir">✦</button>
+<button class="star-point" data-id="porto" data-label="O lugar onde vou descansar ao teu lado" style="--x:18%; --y:10%;" type="button" aria-label="O lugar onde vou descansar ao teu lado">✦</button>
+<button class="star-point" data-id="farol" data-label="A luz que não se apaga nos dias difíceis" style="--x:31%; --y:16%;" type="button" aria-label="A luz que não se apaga nos dias difíceis">✦</button>
+<button class="star-point" data-id="vento" data-label="As viagens que ainda vão nos atravessar" style="--x:45%; --y:9%;" type="button" aria-label="As viagens que ainda vão nos atravessar">✦</button>
+<button class="star-point" data-id="mar" data-label="Ubatuba e todos os mares que ainda veremos" style="--x:59%; --y:17%;" type="button" aria-label="Ubatuba e todos os mares que ainda veremos">✦</button>
+<button class="star-point" data-id="lua" data-label="As noites em que o mundo fica pequeno para nós" style="--x:73%; --y:11%;" type="button" aria-label="As noites em que o mundo fica pequeno para nós">✦</button>
+<button class="star-point" data-id="chave" data-label="As portas que abriremos juntos" style="--x:87%; --y:20%;" type="button" aria-label="As portas que abriremos juntos">✦</button>
+<button class="star-point" data-id="riso" data-label="Teu riso fazendo casa no meu dia" style="--x:13%; --y:34%;" type="button" aria-label="Teu riso fazendo casa no meu dia">✦</button>
+<button class="star-point" data-id="domingo" data-label="Domingos simples, lentos e nossos" style="--x:27%; --y:31%;" type="button" aria-label="Domingos simples, lentos e nossos">✦</button>
+<button class="star-point" data-id="cafe" data-label="Café, silêncio e presença" style="--x:39%; --y:39%;" type="button" aria-label="Café, silêncio e presença">✦</button>
+<button class="star-point" data-id="livro" data-label="Os livros que ainda vou te contar" style="--x:53%; --y:32%;" type="button" aria-label="Os livros que ainda vou te contar">✦</button>
+<button class="star-point" data-id="janela" data-label="A janela de um apartamento com paz" style="--x:68%; --y:38%;" type="button" aria-label="A janela de um apartamento com paz">✦</button>
+<button class="star-point" data-id="museu" data-label="A tua prateleira virando museu" style="--x:82%; --y:34%;" type="button" aria-label="A tua prateleira virando museu">✦</button>
+<button class="star-point" data-id="jardim" data-label="Pequenas flores em dias comuns" style="--x:9%; --y:55%;" type="button" aria-label="Pequenas flores em dias comuns">✦</button>
+<button class="star-point" data-id="chuva" data-label="Chuva na janela e nós dois sem pressa" style="--x:22%; --y:50%;" type="button" aria-label="Chuva na janela e nós dois sem pressa">✦</button>
+<button class="star-point" data-id="abraco" data-label="O abraço que reorganiza o mundo" style="--x:36%; --y:58%;" type="button" aria-label="O abraço que reorganiza o mundo">✦</button>
+<button class="star-point" data-id="tempo" data-label="O tempo passando sem apagar o que fomos" style="--x:50%; --y:51%;" type="button" aria-label="O tempo passando sem apagar o que fomos">✦</button>
+<button class="star-point" data-id="promessa" data-label="Promessas pequenas que eu quero cumprir" style="--x:63%; --y:57%;" type="button" aria-label="Promessas pequenas que eu quero cumprir">✦</button>
+<button class="star-point" data-id="familia" data-label="A família que a gente ainda vai escolher ser" style="--x:78%; --y:52%;" type="button" aria-label="A família que a gente ainda vai escolher ser">✦</button>
+<button class="star-point" data-id="mesa" data-label="A mesa posta depois de um dia cansativo" style="--x:91%; --y:60%;" type="button" aria-label="A mesa posta depois de um dia cansativo">✦</button>
+<button class="star-point" data-id="arte" data-label="Desenhos, cartas e tudo que eu fizer por nós" style="--x:15%; --y:75%;" type="button" aria-label="Desenhos, cartas e tudo que eu fizer por nós">✦</button>
+<button class="star-point" data-id="coragem" data-label="A coragem de continuar escolhendo" style="--x:29%; --y:70%;" type="button" aria-label="A coragem de continuar escolhendo">✦</button>
+<button class="star-point" data-id="cuidado" data-label="Cuidar de ti sem te prender" style="--x:42%; --y:78%;" type="button" aria-label="Cuidar de ti sem te prender">✦</button>
+<button class="star-point" data-id="liberdade" data-label="Liberdade com endereço e afeto" style="--x:56%; --y:71%;" type="button" aria-label="Liberdade com endereço e afeto">✦</button>
+<button class="star-point" data-id="memoria" data-label="Memórias que ainda vão nascer" style="--x:70%; --y:79%;" type="button" aria-label="Memórias que ainda vão nascer">✦</button>
+<button class="star-point" data-id="estrela" data-label="A estrela que recebeu teu nome em mim" style="--x:84%; --y:74%;" type="button" aria-label="A estrela que recebeu teu nome em mim">✦</button>
+<button class="star-point" data-id="manha" data-label="Manhãs em que acordar será leve" style="--x:22%; --y:88%;" type="button" aria-label="Manhãs em que acordar será leve">✦</button>
+<button class="star-point" data-id="professor" data-label="O futuro em que ensino e volto para casa" style="--x:39%; --y:91%;" type="button" aria-label="O futuro em que ensino e volto para casa">✦</button>
+<button class="star-point" data-id="paz" data-label="A paz que sempre pareceu distante" style="--x:58%; --y:88%;" type="button" aria-label="A paz que sempre pareceu distante">✦</button>
+<button class="star-point" data-id="sempre" data-label="O sempre feito de muitos dias pequenos" style="--x:77%; --y:90%;" type="button" aria-label="O sempre feito de muitos dias pequenos">✦</button>
+<button class="star-point" data-id="viagem" data-label="Rodoviárias, malas e risos cansados" style="--x:5%; --y:87%;" type="button" aria-label="Rodoviárias, malas e risos cansados">✦</button>
+<button class="star-point" data-id="cozinha" data-label="Comida simples e conversa no fim do dia" style="--x:94%; --y:82%;" type="button" aria-label="Comida simples e conversa no fim do dia">✦</button>
+</div>
+<div class="future-message" id="future-message">Escolha duas estrelas. O céu vai dizer o que nasce entre elas.</div>
+<div class="future-actions">
+<button class="future-reset" id="future-reset" type="button">Apagar constelação</button>
+</div>
+</div>
+</section>
+<!-- ITEM 6 — O coração -->
+<section aria-hidden="true" aria-label="O coração" class="relic-stage coracao-stage" id="coracao-stage">
+<div class="heart-silence" id="heart-silence"></div>
+<div aria-labelledby="coracao-title" aria-modal="true" class="heart-final-card" role="dialog">
+<button aria-label="Fechar coração" class="relic-close heart-close" data-close-relic="" type="button">×</button>
+<div class="relic-mark">Item VI · O coração</div>
+<h2 class="heart-title" id="coracao-title">Sem personagem. Sem ornamento. Só eu.</h2>
+<div class="heart-photo-wrap">
+<img alt="Uma memória final" class="heart-photo" src="imgVic/coracao-final.jpg"/>
+</div>
+<p class="heart-message">Depois de todos os símbolos, segredos, luzes e relicários… ainda sobra a coisa mais simples: eu amo <span class="mel-gold">você</span>. Obrigado por existir comigo.</p>
+<audio id="heart-voice" preload="metadata" src="S.M/voz-final.mp3"></audio>
+<button class="heart-voice-btn" id="heart-voice-btn" type="button">Ouvir minha voz</button>
+</div>
+</section>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="segredoVic.js"></script>
+</body>
+</html>
